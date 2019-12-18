@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Nanonaut Action</title>
+</head>
+<body>
+<script>
+//constants
+var CANVAS_WIDTH = 800;
+var CANVAS_HEIGHT = 600;
+var NANONAUT_WIDTH = 181;
+var NANONAUT_HEIGHT = 229
+var GROUND_Y = 540;
+
+var SPACE_KEYCODE = 32;
+
+var NANONAUT_NR_FRAMES_PER_ROW = 5;
+var NANONAUT_NR_ANIMATION_FRAMES = 7;
+
+var nanonautX = CANVAS_WIDTH/2;
+var nanonautY = GROUND_Y - NANONAUT_HEIGHT;
+
+var cameraX = 0;
+var cameraY = 0;
+
+var BACKGROUND_WIDTH = 1000;
+var NANONAUT_JUMP_SPEED = 20;
+var NANONAUT_Y_ACCELERATION = 1;
+
+var NANONAUT_ANIMATION_SPEED = 3;
+
+//setup
+var canvas = document.createElement('canvas');
+var c = canvas.getContext('2d');
+canvas.width = CANVAS_WIDTH;
+canvas.height = CANVAS_HEIGHT;
+document.body.appendChild(canvas);
+
+var NANONAUT_X_SPEED = 5;
+
+var gameFrameCounter = 0;
+
+var nanonautYSpeed = 0;
+var nanonautIsInTheAir = false;
+
+var spaceKeyIsPressed = false;
+var nanonautFrameNr = 0;
+
+var nanonautImage = new Image();
+nanonautImage.src = 'animatedNanonaut.png';
+
+var backgroundImage = new Image();
+backgroundImage.src = 'background.png';
+
+
+window.addEventListener('keydown', onKeyDown);
+window.addEventListener('keyup', onKeyUp);
+window.addEventListener('load', start);
+
+function start()
+{
+	console.log("Loading");
+	window.requestAnimationFrame(mainLoop);
+}
+
+//main loop 
+function mainLoop()
+{
+	update();
+	draw();
+	window.requestAnimationFrame(mainLoop)
+}
+
+//player input
+function onKeyDown(event)
+{
+	if (event.keyCode === SPACE_KEYCODE)
+	{
+		spaceKeyIsPressed = true;
+	}
+}
+
+function onKeyUp(event)
+{
+	if (event.keyCode === SPACE_KEYCODE)
+	{
+		spaceKeyIsPressed = false;
+	}
+}
+
+//updating
+function update()
+{
+	gameFrameCounter = gameFrameCounter + 1;
+	if (spaceKeyIsPressed && !nanonautIsInTheAir)
+	{
+		nanonautYSpeed = -NANONAUT_JUMP_SPEED;
+		nanonautIsInTheAir = true;
+	}
+
+	nanonautX = nanonautX + NANONAUT_X_SPEED;	
+
+	//update nanonaut.
+	nanonautY = nanonautY + nanonautYSpeed;
+	nanonautYSpeed = nanonautYSpeed + NANONAUT_Y_ACCELERATION;
+	if (nanonautY > (GROUND_Y - NANONAUT_HEIGHT))
+	{
+		nanonautY  = GROUND_Y - NANONAUT_HEIGHT;
+		nanonautYSpeed = 0;
+		nanonautIsInTheAir = false;
+	}
+	
+	// Update Animation
+	if ((gameFrameCounter % NANONAUT_ANIMATION_SPEED) === 0){
+		nanonautFrameNr = nanonautFrameNr + 1;
+		if (nanonautFrameNr >= NANONAUT_NR_ANIMATION_FRAMES) {
+			nanonautFrameNr = 0;
+		}
+	}
+	
+	//Update camera
+	cameraX = nanonautX - 150;
+}
+
+
+function draw()
+{
+	//Draw the sky.
+	c.fillStyle = 'LIGHTSKYBLUE';
+	c.fillRect(0, 0, CANVAS_WIDTH, GROUND_Y - 40);
+
+	//draw the background
+	var backgroundX = - (cameraX %  BACKGROUND_WIDTH);
+	c.drawImage(backgroundImage, backgroundX, -210);
+	c.drawImage(backgroundImage, backgroundX + BACKGROUND_WIDTH, -210);
+	
+
+	//Draw the ground
+	c.fillStyle = 'ForestGreen';
+	c.fillRect(0, GROUND_Y - 40, CANVAS_WIDTH, CANVAS_HEIGHT - GROUND_Y + 40);
+
+	// Draw the Nanonaut.
+	var nanonautSpriteSheetRow = Math.floor(nanonautFrameNr / NANONAUT_NR_FRAMES_PER_ROW);
+	var nanoanutSpriteSheetColumn = nanonautFrameNr % NANONAUT_NR_FRAMES_PER_ROW;
+	var nanonautSpriteSheetX = nanoanutSpriteSheetColumn * NANONAUT_WIDTH;
+	var nanonautSpriteSheetY = nanonautSpriteSheetRow * NANONAUT_HEIGHT;
+	
+	c.drawImage(nanonautImage, nanonautSpriteSheetX, nanonautSpriteSheetY,
+	NANONAUT_WIDTH, NANONAUT_HEIGHT, nanonautX - cameraX, nanonautY - cameraY,
+	NANONAUT_WIDTH, NANONAUT_HEIGHT);
+}	 
+
+</script>
+</body>
+</html>
