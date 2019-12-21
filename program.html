@@ -58,15 +58,7 @@ bush1Image.src = "bush1.png";
 var bush2Image = new Image();
 bush2Image.src = "bush2.png";
 
-var bushData = [{
-x: 550,
-y: 100,
-image: bush1Image
-},{
-x: 750,
-y: 90,
-image: bush2Image
-}];
+var bushData = generateBushes();
 
 window.addEventListener('keydown', onKeyDown);
 window.addEventListener('keyup', onKeyUp);
@@ -76,6 +68,11 @@ function start()
 {
 	console.log("Loading");
 	window.requestAnimationFrame(mainLoop);
+}
+
+function generateBushes(){
+	var generatedBushData = [];
+	return generatedBushData;
 }
 
 //main loop 
