@@ -73,14 +73,34 @@ function start()
 function generateBushes()
 {
 	var generatedBushData = [];
-	for (var i=0; i<10; i++) {
+	var bushX = 0;
+	while (bushX < (20 * CANVAS_WIDTH)){
+		var bushImage;
+		if (Math.random() >= 0.5)
+		{
+			bushImage = bush1Image;
+		}
+		else
+		{
+			bushImage = bush2Image;
+		}
 		generatedBushData.push(
 		{
-			x:550+ Math.random() * CANVAS_WIDTH,
-			y:80 + Math.random() * 20,
-			image:bush1Image
+			x: bushX,
+			y: 80 + Math.random() * 20,
+			image:bushImage
 		});
+		bushX += 150 + Math.random() * 200;
+		
+		if(generatedBushData.length>=50)
+		{
+			break;
+		}
 	}
+	
+	console.log("generatedBushData.length=");
+	console.log(generatedBushData.length);
+	
 	return generatedBushData;
 }
 
