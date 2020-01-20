@@ -30,6 +30,10 @@ var NANONAUT_Y_ACCELERATION = 1;
 
 var NANONAUT_ANIMATION_SPEED = 3;
 
+var ROBOT_ANIMATION_SPEED = 5;
+var ROBOT_ANIMATION_FRAMES = 9;
+var ROBOT_X_SPEED = 4;
+
 //setup
 var canvas = document.createElement('canvas');
 var c = canvas.getContext('2d');
@@ -90,7 +94,7 @@ frameNr: 0
 
 function start()
 {
-	console.log("Loading");
+	console.log("");
 	window.requestAnimationFrame(mainLoop);
 }
 
@@ -192,6 +196,25 @@ function update()
 	bushData[i].x += (2*CANVAS_WIDTH)+150;
 	//console.log("New bush x:" + bushData[i].x);
 	}
+	}
+	
+	updateRobots();
+}
+
+function updateRobots()
+{
+	//move and animate robots.
+	for (var i=0; i<robotData.length; i++)
+	{
+		robotData[i].x -= ROBOT_X_SPEED;
+		if ((gameFrameCounter % ROBOT_ANIMATION_SPEED) ===0)
+		{
+			robotData[i].frameNr= robotData[i].frameNr+1;
+			if(robotData[i].frameNr>=ROBOT_ANIMATION_FRAMES)
+			{
+				robotData[i].frameNr = 0;
+			}
+		}
 	}
 }
 
