@@ -16,6 +16,10 @@ var ROBOT_HEIGHT = 139;
 
 var SPACE_KEYCODE = 32;
 
+var MIN_DISTANCE_BETWEEN_ROBOTS = 400;
+var MAX_DISTANCE_BETWEEN_ROBOTS = 1200;
+var MAX_ACTIVE_ROBOTS = 3
+
 var NANONAUT_NR_ANIMATION_FRAMES = 7;
 
 var nanonautX = CANVAS_WIDTH/2;
@@ -40,6 +44,8 @@ var c = canvas.getContext('2d');
 canvas.width = CANVAS_WIDTH;
 canvas.height = CANVAS_HEIGHT;
 document.body.appendChild(canvas);
+
+var robotData = [];
 
 var NANONAUT_X_SPEED = 5;
 
@@ -216,6 +222,35 @@ function updateRobots()
 			}
 		}
 	}
+	
+	//remove robots that have gone off screen ASAP
+	var robotIndex = 0;
+	while (robotIndex < robotData.length) 
+	{
+		if (robotData[robotIndex].x < cameraX - ROBOT_WIDTH) 
+		{
+			robotData.splice(robotIndex, 1);
+			console.log ("i am a crash-a-holic") 
+		} else {
+		robotIndex += 1;
+		}
+	}
+
+	if (robotData.length < MAX_ACTIVE_ROBOTS)
+	{
+		var lastRobotX = robotData[robotData.length - 1].x;
+		
+		var newRobotX = lastRobotX + MIN_DISTANCE_BETWEEN_ROBOTS + Math.random() *
+		(MAX_DISTANCE_BETWEEN_ROBOTS - MIN_DISTANCE_BETWEEN_ROBOTS);
+		
+		robotData.push({
+		x: newRobotX,
+		y: GROUND_Y - ROBOT_HEIGHT,
+		frameNr: 0
+		});
+	}
+
+	
 }
 
 //draw
