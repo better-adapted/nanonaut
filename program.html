@@ -92,6 +92,20 @@ spriteHeight: ROBOT_HEIGHT,
 image: robotImage
 };
 
+var nanonautCollisionRectangle = {
+xOffset: 60,
+yOffset: 20,
+width: 50,
+height:200
+};
+
+var robotCollisionRectangle = {
+xOffset: 50,
+yOffset: 20,
+width: 50,
+height:100
+};
+
 var robotData = [{
 x:400,
 y: GROUND_Y - ROBOT_HEIGHT,
@@ -207,14 +221,53 @@ function update()
 	updateRobots();
 }
 
+
+function doesNanoutOverlapRobotAlongOneAxis(nanonautNearX, nanonautFarX, robotNearX, robotFarX)
+{
+	var nanonautOverlapsNearRobotEdge = (nanonautFarX >= robotNearX) &&  (nanonautFarX <= robotFarX);	
+	
+	var nanonautOverlapsFarRobotEdge = (nanonautNearX >= robotNearX) && (nanonautNearX <= robotFarX);	
+	
+	var nanonautOverlapsEntireRobot = (nanonautNearX <= robotNearX) && (nanonautFarX >= robotFarX);
+	
+	return nanonautOverlapsNearRobotEdge || nanonautOverlapsFarRobotEdge || nanonautOverlapsEntireRobot;
+}
+
+function doesNanoutOverlapRobot(nanonautX, nanonautY, nanonautWidth,
+nanonautHeight, robotX, robotY, robotWidth, robotHeight) {
+var nanonautOverlapsRobotOnXAxis = doesNanoutOverlapRobotAlongOneAxis(
+nanonautX,
+nanonautX + nanonautWidth,
+robotX,
+robotX + robotWidth
+);
+var nanonautOverlapsFarRobotOnYAxis = doesNanoutOverlapRobotAlongOneAxis(
+nanonautY,
+nanonautY + nanonautHeight,
+robotY,
+robotY + robotHeight
+);
+return nanonautOverlapsRobotOnXAxis && nanonautOverlapsFarRobotOnYAxis;
+}
+
 function updateRobots()
 {
-	
-	
-	
 	//move and animate robots.
 	for (var i=0; i<robotData.length; i++)
 	{
+		if(doesNanoutOverlapRobot(
+		nanonautX + nanonautCollisionRectangle.xOffset,
+		nanonautY + nanonautCollisionRectangle.yOffset,
+		nanonautCollisionRectangle.width,
+		nanonautCollisionRectangle.height,
+		robotData[i].x + robotCollisionRectangle.xOffset,
+		robotData[i].y + robotCollisionRectangle.yOffset,
+		robotCollisionRectangle.width,
+		robotCollisionRectangle.height,	
+		)) {
+		console.log("Ouch");
+		}
+		
 		robotData[i].x -= ROBOT_X_SPEED;
 		if ((gameFrameCounter % ROBOT_ANIMATION_SPEED) ===0)
 		{
