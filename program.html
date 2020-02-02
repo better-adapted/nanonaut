@@ -38,6 +38,9 @@ var ROBOT_ANIMATION_SPEED = 5;
 var ROBOT_ANIMATION_FRAMES = 9;
 var ROBOT_X_SPEED = 4;
 
+var screenshake = false;
+var SCREENSHAKE_RADIUS = 16;
+
 //setup
 var canvas = document.createElement('canvas');
 var c = canvas.getContext('2d');
@@ -211,14 +214,20 @@ function update()
 	cameraX = nanonautX - 150;
 	
 	// Update bushes 
-	for(var i=0; i<bushData.length;i++){
-	if((bushData[i].x - cameraX) < -CANVAS_WIDTH) {
-	bushData[i].x += (2*CANVAS_WIDTH)+150;
-	//console.log("New bush x:" + bushData[i].x);
+	for(var i=0; i<bushData.length;i++)
+	{
+		if((bushData[i].x - cameraX) < -CANVAS_WIDTH)
+		{
+			bushData[i].x += (2*CANVAS_WIDTH)+150;
+			//console.log("New bush x:" + bushData[i].x);
+		}
 	}
+	screenshake = false;
+	var nanonautTouchedARobot = updateRobots();
+	if(nanonautTouchedARobot)
+	{
+		screenshake = true;
 	}
-	
-	updateRobots();
 }
 
 
@@ -233,26 +242,29 @@ function doesNanoutOverlapRobotAlongOneAxis(nanonautNearX, nanonautFarX, robotNe
 	return nanonautOverlapsNearRobotEdge || nanonautOverlapsFarRobotEdge || nanonautOverlapsEntireRobot;
 }
 
-function doesNanoutOverlapRobot(nanonautX, nanonautY, nanonautWidth,
-nanonautHeight, robotX, robotY, robotWidth, robotHeight) {
-var nanonautOverlapsRobotOnXAxis = doesNanoutOverlapRobotAlongOneAxis(
-nanonautX,
-nanonautX + nanonautWidth,
-robotX,
-robotX + robotWidth
-);
-var nanonautOverlapsFarRobotOnYAxis = doesNanoutOverlapRobotAlongOneAxis(
-nanonautY,
-nanonautY + nanonautHeight,
-robotY,
-robotY + robotHeight
-);
-return nanonautOverlapsRobotOnXAxis && nanonautOverlapsFarRobotOnYAxis;
+function doesNanoutOverlapRobot(nanonautX, nanonautY, nanonautWidth,nanonautHeight, robotX, robotY, robotWidth, robotHeight)
+{
+	var nanonautOverlapsRobotOnXAxis = doesNanoutOverlapRobotAlongOneAxis(
+	nanonautX,
+	nanonautX + nanonautWidth,
+	robotX,
+	robotX + robotWidth
+	);
+	
+	var nanonautOverlapsFarRobotOnYAxis = doesNanoutOverlapRobotAlongOneAxis(
+	nanonautY,
+	nanonautY + nanonautHeight,
+	robotY,
+	robotY + robotHeight
+	);
+	
+	return nanonautOverlapsRobotOnXAxis && nanonautOverlapsFarRobotOnYAxis;
 }
 
 function updateRobots()
 {
 	//move and animate robots.
+	var nanonautTouchedARobot = false;
 	for (var i=0; i<robotData.length; i++)
 	{
 		if(doesNanoutOverlapRobot(
@@ -265,8 +277,9 @@ function updateRobots()
 		robotCollisionRectangle.width,
 		robotCollisionRectangle.height,	
 		)) {
+		nanonautTouchedARobot = true;
 		console.log("Ouch");
-		}
+ 		}
 		
 		robotData[i].x -= ROBOT_X_SPEED;
 		if ((gameFrameCounter % ROBOT_ANIMATION_SPEED) ===0)
@@ -278,6 +291,7 @@ function updateRobots()
 			}
 		}
 	}
+	
 	
 	//remove robots that have gone off screen ASAP
 	var robotIndex = 0;
@@ -311,11 +325,23 @@ function updateRobots()
 		frameNr: 0
 		});
 	}
+	
+	return nanonautTouchedARobot;
 }
 
 //draw
 function draw()
 {
+	var shakenCameraX = cameraX;
+	var shakenCameraY = cameraY;
+	
+	if(screenshake)
+	{
+		shakenCameraX += (Math.random() - .5) * SCREENSHAKE_RADIUS;
+		shakenCameraY += (Math.random() - .5) * SCREENSHAKE_RADIUS;
+	}
+	
+
 	//Draw the sky.
 	c.fillStyle = 'LIGHTSKYBLUE';
 	c.fillRect(0, 0, CANVAS_WIDTH, GROUND_Y - 40);
@@ -333,13 +359,13 @@ function draw()
 	//draw the bushes
 	for (var i=0; i<bushData.length; i++) {
 	c.drawImage(bushData[i].image, bushData[i].x - 
-	cameraX, GROUND_Y - bushData[i].y - cameraY);
+	shakenCameraX, GROUND_Y - bushData[i].y - shakenCameraY);
 	}
 	
 	// draw the robot
 	for (var i=0; i<robotData.length; i++) {
 	drawAnimatedSprite(robotData[i].x - cameraX,
-	robotData[i].y - cameraY, robotData[i].frameNr, robotSpriteSheet);
+	robotData[i].y - shakenCameraY, robotData[i].frameNr, robotSpriteSheet);
 	}
 	
 	// Draw the Nanonaut.
@@ -348,31 +374,21 @@ function draw()
 }	
 
 	//draw animated sprite
-function drawAnimatedSprite(screenX, screenY, frameNr, spriteSheet) {
-var spriteSheetRow = Math.floor(frameNr / spriteSheet.nrFramesPerRow);
-var spriteSheetColumn = frameNr % spriteSheet.nrFramesPerRow;
-var spriteSheetX = spriteSheetColumn * spriteSheet.spriteWidth;
-var spriteSheetY = spriteSheetRow * spriteSheet.spriteHeight;
-c.drawImage(
-spriteSheet.image,
-spriteSheetX,spriteSheetY,
-spriteSheet.spriteWidth,spriteSheet.spriteHeight, screenX, screenY,
-spriteSheet.spriteWidth, spriteSheet.spriteHeight
-);
+function drawAnimatedSprite(screenX, screenY, frameNr, spriteSheet)
+{
+	var spriteSheetRow = Math.floor(frameNr / spriteSheet.nrFramesPerRow);
+	var spriteSheetColumn = frameNr % spriteSheet.nrFramesPerRow;
+	var spriteSheetX = spriteSheetColumn * spriteSheet.spriteWidth;
+	var spriteSheetY = spriteSheetRow * spriteSheet.spriteHeight;
+	c.drawImage(
+	spriteSheet.image,
+	spriteSheetX,spriteSheetY,
+	spriteSheet.spriteWidth,spriteSheet.spriteHeight, screenX, screenY,
+	spriteSheet.spriteWidth, spriteSheet.spriteHeight
+	);
 }
 
 
-
-
-
-
-
-
-
-	
-	
-	
-	 
 
 </script>
 </body>
