@@ -18,6 +18,9 @@ var SPACE_KEYCODE = 32;
 
 var NANONAUT_MAX_HEALTH = 100;
 
+var PLAY_GAME_MODE = 0;
+var GAME_OVER_GAME_MODE = 1;
+
 var nanonautHealth = NANONAUT_MAX_HEALTH;
 
 var MIN_DISTANCE_BETWEEN_ROBOTS = 400;
@@ -51,6 +54,8 @@ var c = canvas.getContext('2d');
 canvas.width = CANVAS_WIDTH;
 canvas.height = CANVAS_HEIGHT;
 document.body.appendChild(canvas);
+
+var gameMode = PLAY_GAME_MODE;
 
 var robotData = [];
 
@@ -187,6 +192,8 @@ function onKeyUp(event)
 //updating
 function update()
 {
+	if (gameMode != PLAY_GAME_MODE) return;
+
 	gameFrameCounter = gameFrameCounter + 1;
 	if (spaceKeyIsPressed && !nanonautIsInTheAir)
 	{
@@ -232,6 +239,11 @@ function update()
 	{
 		screenshake = true;
 		if (nanonautHealth > 0) nanonautHealth -= 1;
+	}
+	//CHECK IF GAME IS OVER
+	if (nanonautHealth <= 0) {
+	gameMode = GAME_OVER_GAME_MODE;
+	screenshake = false;
 	}
 }
 
@@ -377,12 +389,24 @@ function draw()
 	drawAnimatedSprite(nanonautX - cameraX, nanonautY - cameraY,
 	nanonautFrameNr, nanonautSpriteSheet);
 	
+	//DRAW METRES TRAVELED
+	var nanonautDistance = nanonautX / 100;
+	c.fillStyle = 'black';
+	c.font = '48px sans-serif';
+	c.fillText (nanonautDistance.toFixed(0) + 'm', 20, 40);
+	
 	// draw the health bar.
 	c.fillStyle = 'red';
 	c.fillRect(400, 10, nanonautHealth /NANONAUT_MAX_HEALTH * 380, 20)
 	c.strokeStyle = 'red';
 	c.strokeRect(400, 10, 380, 20);
 }	
+//game over title
+if (gameMode == GAME_OVER_GAME_MODE) {
+c.fillStyle = 'black';
+c.font = '96px sans-serif';
+c.fillText('GAME OVER' , 120, 300);
+}
 
 	//draw animated sprite
 function drawAnimatedSprite(screenX, screenY, frameNr, spriteSheet)
