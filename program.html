@@ -16,6 +16,10 @@ var ROBOT_HEIGHT = 139;
 
 var SPACE_KEYCODE = 32;
 
+var NANONAUT_MAX_HEALTH = 100;
+
+var nanonautHealth = NANONAUT_MAX_HEALTH;
+
 var MIN_DISTANCE_BETWEEN_ROBOTS = 400;
 var MAX_DISTANCE_BETWEEN_ROBOTS = 1200;
 var MAX_ACTIVE_ROBOTS = 3
@@ -227,6 +231,7 @@ function update()
 	if(nanonautTouchedARobot)
 	{
 		screenshake = true;
+		if (nanonautHealth > 0) nanonautHealth -= 1;
 	}
 }
 
@@ -371,6 +376,12 @@ function draw()
 	// Draw the Nanonaut.
 	drawAnimatedSprite(nanonautX - cameraX, nanonautY - cameraY,
 	nanonautFrameNr, nanonautSpriteSheet);
+	
+	// draw the health bar.
+	c.fillStyle = 'red';
+	c.fillRect(400, 10, nanonautHealth /NANONAUT_MAX_HEALTH * 380, 20)
+	c.strokeStyle = 'red';
+	c.strokeRect(400, 10, 380, 20);
 }	
 
 	//draw animated sprite
